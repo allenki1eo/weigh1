@@ -4,7 +4,7 @@ from __future__ import annotations
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
     QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget,
-    QHBoxLayout,
+    QHBoxLayout, QFrame,
 )
 
 from weighmaster.database.models import User

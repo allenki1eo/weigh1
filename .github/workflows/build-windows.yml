@@ -1,0 +1,148 @@
+name: Build Windows .exe
+
+on:
+  push:
+    branches:
+      - claude/build-weighmaster-pro-cGNYq
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch:        # allow manual trigger from GitHub UI
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Python 3.11 ───────────────────────────────────────────────────
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      # ── 3. Install dependencies ──────────────────────────────────────────
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller==6.11.0
+
+      # ── 4. Download fonts (Google Fonts OFL licence) ─────────────────────
+      - name: Download bundled fonts
+        shell: pwsh
+        run: |
+          $fonts_dir = "weighmaster\assets\fonts"
+          New-Item -ItemType Directory -Force -Path $fonts_dir | Out-Null
+
+          $fonts = @(
+            # JetBrains Mono — weight hero display
+            @{
+              url  = "https://github.com/JetBrains/JetBrainsMono/releases/download/v2.304/JetBrainsMono-2.304.zip"
+              file = "JetBrainsMono.zip"
+              dir  = "JetBrainsMono-2.304\fonts\ttf"
+              pick = @("JetBrainsMono-Regular.ttf","JetBrainsMono-Bold.ttf")
+            },
+            # DM Sans — body / UI labels
+            @{
+              url  = "https://github.com/googlefonts/dm-fonts/releases/download/v1.100/fonts-dm-sans.zip"
+              file = "DMSans.zip"
+              dir  = "fonts-dm-sans\DMSans\static"
+              pick = @("DMSans-Regular.ttf","DMSans-SemiBold.ttf","DMSans-Bold.ttf")
+            }
+          )
+
+          foreach ($f in $fonts) {
+            Write-Host "Downloading $($f.file) ..."
+            $tmp = "$env:TEMP\$($f.file)"
+            Invoke-WebRequest -Uri $f.url -OutFile $tmp -UseBasicParsing
+            $extract = "$env:TEMP\font_extract_$([System.IO.Path]::GetRandomFileName())"
+            Expand-Archive -Path $tmp -DestinationPath $extract -Force
+            foreach ($ttf in $f.pick) {
+              $src = Get-ChildItem -Path $extract -Filter $ttf -Recurse | Select-Object -First 1
+              if ($src) {
+                Copy-Item $src.FullName -Destination $fonts_dir -Force
+                Write-Host "  Copied $ttf"
+              } else {
+                Write-Warning "  $ttf not found in archive — skipping"
+              }
+            }
+          }
+
+          # Inter — headings (download single TTF from Google Fonts API)
+          $inter_url = "https://fonts.google.com/download?family=Inter"
+          $inter_tmp = "$env:TEMP\Inter.zip"
+          try {
+            Invoke-WebRequest -Uri $inter_url -OutFile $inter_tmp -UseBasicParsing
+            $inter_dir = "$env:TEMP\inter_extract"
+            Expand-Archive -Path $inter_tmp -DestinationPath $inter_dir -Force
+            foreach ($ttf in @("Inter-Regular.ttf","Inter-SemiBold.ttf","Inter-Bold.ttf")) {
+              $src = Get-ChildItem -Path $inter_dir -Filter $ttf -Recurse | Select-Object -First 1
+              if ($src) {
+                Copy-Item $src.FullName -Destination $fonts_dir -Force
+                Write-Host "  Copied $ttf"
+              }
+            }
+          } catch {
+            Write-Warning "Inter download failed — application will use system fallback font"
+          }
+
+          Write-Host "`nFonts in $fonts_dir :"
+          Get-ChildItem $fonts_dir | Format-Table Name
+
+      # ── 5. Build with PyInstaller ─────────────────────────────────────────
+      - name: Build executable
+        run: |
+          pyinstaller weighmaster.spec --clean --noconfirm
+        env:
+          PYTHONOPTIMIZE: "1"
+
+      # ── 6. Smoke-test: verify exe exists and is non-trivial ───────────────
+      - name: Verify build output
+        shell: pwsh
+        run: |
+          $exe = "dist\WeighMaster Pro\WeighMasterPro.exe"
+          if (-not (Test-Path $exe)) {
+            Write-Error "Executable not found at $exe"
+            exit 1
+          }
+          $size = (Get-Item $exe).Length
+          Write-Host "WeighMasterPro.exe size: $([math]::Round($size/1MB, 2)) MB"
+          if ($size -lt 1MB) {
+            Write-Error "Executable suspiciously small ($size bytes)"
+            exit 1
+          }
+          Write-Host "Build OK"
+
+      # ── 7. Create zip archive ─────────────────────────────────────────────
+      - name: Zip distribution folder
+        shell: pwsh
+        run: |
+          Compress-Archive `
+            -Path "dist\WeighMaster Pro\*" `
+            -DestinationPath "WeighMasterPro-windows-x64.zip"
+          Write-Host "Archive size: $([math]::Round((Get-Item WeighMasterPro-windows-x64.zip).Length/1MB,2)) MB"
+
+      # ── 8. Upload artifact (available for 30 days) ───────────────────────
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WeighMasterPro-windows-x64
+          path: WeighMasterPro-windows-x64.zip
+          retention-days: 30
+          if-no-files-found: error
+
+      # ── 9. Attach to GitHub release (only on version tags) ────────────────
+      - name: Upload to GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: WeighMasterPro-windows-x64.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

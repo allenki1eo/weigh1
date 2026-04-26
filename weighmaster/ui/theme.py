@@ -1,42 +1,52 @@
-"""Master QSS stylesheet — ALL styles defined here, never inline."""
+"""Master QSS stylesheet — modern cargo-dashboard inspired design."""
 
 # ─── Colour tokens ────────────────────────────────────────────────────────────
-BG_PAGE       = "#D9DEE3"
-BG_SIDEBAR    = "#ECEFF3"
-BG_CARD       = "#F6F8FB"
-BG_INPUT      = "#FBFCFD"
-BG_TABLE_ALT  = "#F2F5F8"
+BG_PAGE       = "#F3F4F6"
+BG_SIDEBAR    = "#FFFFFF"
+BG_CARD       = "#FFFFFF"
+BG_INPUT      = "#F9FAFB"
+BG_TABLE_ALT  = "#FAFBFC"
+BG_HOVER      = "#F3F4F6"
 
-BRAND         = "#111418"
-BRAND_DARK    = "#050709"
-BRAND_LIGHT   = "#E4E8EF"
-BRAND_MID     = "#5F6D80"
-BRAND_GRAD_START = "#222A33"
-BRAND_GRAD_END   = "#111418"
+BRAND         = "#4F46E5"   # Indigo
+BRAND_DARK    = "#4338CA"
+BRAND_LIGHT   = "#EEF2FF"
+BRAND_MID     = "#6366F1"
 
-TEAL          = "#0D9488"
+TEAL          = "#14B8A6"
 TEAL_LIGHT    = "#CCFBF1"
 
-GREEN         = "#059669"
+GREEN         = "#10B981"
 GREEN_LIGHT   = "#D1FAE5"
 GREEN_TEXT    = "#047857"
-AMBER         = "#B45309"
+GREEN_PILL    = "#84CC16"   # Lime for status pills
+
+AMBER         = "#F59E0B"
 AMBER_LIGHT   = "#FEF3C7"
 AMBER_TEXT    = "#92400E"
-RED           = "#DC2626"
+AMBER_PILL    = "#EAB308"   # Yellow for pills
+
+RED           = "#EF4444"
 RED_LIGHT     = "#FEE2E2"
-RED_DARK      = "#991B1B"
+RED_DARK      = "#B91C1C"
+RED_PILL      = "#F87171"
 
-TEXT_PRIMARY  = "#0D1116"
-TEXT_BODY     = "#2B3440"
-TEXT_SECONDARY= "#4F5E6F"
-TEXT_MUTED    = "#7F8B98"
-TEXT_DISABLED = "#ADB6C1"
+PURPLE        = "#8B5CF6"
+PURPLE_LIGHT  = "#EDE9FE"
 
-BORDER        = "#D4DAE1"
-BORDER_MEDIUM = "#BFC8D2"
-BORDER_FOCUS  = "#5F6D80"
-SHADOW        = "rgba(10, 16, 24, 0.08)"
+TEXT_PRIMARY  = "#111827"
+TEXT_BODY     = "#374151"
+TEXT_SECONDARY= "#6B7280"
+TEXT_MUTED    = "#9CA3AF"
+TEXT_DISABLED = "#D1D5DB"
+
+BORDER        = "#E5E7EB"
+BORDER_MEDIUM = "#D1D5DB"
+BORDER_FOCUS  = "#4F46E5"
+
+SHADOW        = "rgba(0, 0, 0, 0.04)"
+SHADOW_CARD   = "rgba(0, 0, 0, 0.06)"
+SHADOW_HOVER  = "rgba(0, 0, 0, 0.08)"
 
 # ─── Master stylesheet ────────────────────────────────────────────────────────
 STYLESHEET = f"""
@@ -45,8 +55,8 @@ STYLESHEET = f"""
 QMainWindow, QDialog, QWidget {{
     background-color: {BG_PAGE};
     color: {TEXT_BODY};
-    font-family: "DM Sans", "Segoe UI", sans-serif;
-    font-size: 12px;
+    font-family: "Inter", "DM Sans", "Segoe UI", sans-serif;
+    font-size: 13px;
 }}
 
 QLabel {{
@@ -62,54 +72,104 @@ QWidget#Sidebar {{
 
 QPushButton#NavItem {{
     background: transparent;
-    border: 1px solid transparent;
-    border-radius: 8px;
+    border: none;
+    border-radius: 10px;
     color: {TEXT_SECONDARY};
     font-size: 12px;
-    font-family: "DM Sans", "Segoe UI", sans-serif;
+    font-weight: 500;
+    font-family: "Inter", "DM Sans", "Segoe UI", sans-serif;
     text-align: left;
-    padding: 8px 12px;
-    min-height: 34px;
-    margin: 1px 8px;
+    padding: 10px 14px;
+    min-height: 40px;
+    margin: 2px 8px;
 }}
 
 QPushButton#NavItem:hover {{
-    background-color: white;
-    border-color: {BORDER};
+    background-color: {BG_HOVER};
     color: {TEXT_PRIMARY};
 }}
 
 QPushButton#NavItem:checked {{
-    background-color: white;
-    border: 1px solid {BORDER_MEDIUM};
-    color: {TEXT_PRIMARY};
+    background-color: {BRAND_LIGHT};
+    color: {BRAND};
     font-weight: 600;
+}}
+
+QPushButton#NavIcon {{
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: {TEXT_MUTED};
+    font-size: 18px;
+    padding: 8px;
+    min-width: 40px;
+    min-height: 40px;
+    max-width: 40px;
+    max-height: 40px;
+}}
+
+QPushButton#NavIcon:hover {{
+    background-color: {BG_HOVER};
+    color: {TEXT_PRIMARY};
+}}
+
+QPushButton#NavIcon:checked {{
+    background-color: {BRAND_LIGHT};
+    color: {BRAND};
 }}
 
 /* ── Cards ── */
 QFrame#Card {{
     background-color: {BG_CARD};
-    border: 1px solid {BORDER};
-    border-radius: 8px;
+    border: none;
+    border-radius: 16px;
 }}
 
 QFrame#CardHeader {{
     background-color: {BG_CARD};
     border-bottom: 1px solid {BORDER};
     border-radius: 0px;
-    padding: 0px 16px;
-    min-height: 44px;
-    max-height: 44px;
+    padding: 0px 20px;
+    min-height: 52px;
+    max-height: 52px;
+}}
+
+/* ── KPI Cards ── */
+QFrame#KpiCard {{
+    background-color: {BG_CARD};
+    border: none;
+    border-radius: 16px;
+    padding: 20px;
+}}
+
+QLabel#KpiValue {{
+    font-family: "Inter", "DM Sans", sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: {TEXT_PRIMARY};
+    background: transparent;
+}}
+
+QLabel#KpiLabel {{
+    font-size: 12px;
+    color: {TEXT_MUTED};
+    background: transparent;
+    font-weight: 500;
+}}
+
+QLabel#KpiIcon {{
+    font-size: 22px;
+    background: transparent;
 }}
 
 /* ── Weight display ── */
 QLabel#WeightHero {{
     font-family: "JetBrains Mono", "Courier New", monospace;
-    font-size: 44px;
+    font-size: 52px;
     font-weight: 700;
-    color: {TEXT_PRIMARY};
+    color: {AMBER};
     background: transparent;
-    letter-spacing: 0px;
+    letter-spacing: -2px;
 }}
 
 QLabel#WeightHero[stable="true"] {{
@@ -138,78 +198,112 @@ QLabel#SubWeight {{
     background: transparent;
 }}
 
-/* ── Status chips ── */
+/* ── Status chips / Pills ── */
 QLabel#ChipStable {{
-    background-color: #EAF8F1;
+    background-color: {GREEN_LIGHT};
     color: {GREEN_TEXT};
-    border: 1px solid #BDE7CD;
-    border-radius: 8px;
-    padding: 2px 10px;
-    font-size: 9px;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 10px;
     font-weight: 700;
-    font-family: "DM Sans", sans-serif;
+    font-family: "Inter", "DM Sans", sans-serif;
 }}
 
 QLabel#ChipUnstable {{
-    background-color: #FFF5E8;
+    background-color: {AMBER_LIGHT};
     color: {AMBER_TEXT};
-    border: 1px solid #F9DEB2;
-    border-radius: 8px;
-    padding: 2px 10px;
-    font-size: 9px;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 10px;
     font-weight: 700;
-    font-family: "DM Sans", sans-serif;
+    font-family: "Inter", "DM Sans", sans-serif;
 }}
 
 QLabel#ChipOverload {{
-    background-color: #FDECEC;
-    color: {RED};
-    border: 1px solid #F6C6C6;
-    border-radius: 8px;
-    padding: 2px 10px;
-    font-size: 9px;
+    background-color: {RED_LIGHT};
+    color: {RED_DARK};
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 10px;
     font-weight: 700;
-    font-family: "DM Sans", sans-serif;
+    font-family: "Inter", "DM Sans", sans-serif;
 }}
 
 QLabel#ChipComplete {{
     background-color: {GREEN_LIGHT};
     color: {GREEN_TEXT};
-    border-radius: 6px;
-    padding: 3px 10px;
-    font-size: 9px;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 10px;
     font-weight: 600;
 }}
 
 QLabel#ChipVoid {{
     background-color: {RED_LIGHT};
-    color: {RED};
-    border-radius: 6px;
-    padding: 3px 10px;
-    font-size: 9px;
+    color: {RED_DARK};
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 10px;
     font-weight: 600;
 }}
 
 QLabel#ChipPending {{
     background-color: {AMBER_LIGHT};
-    color: {AMBER};
-    border-radius: 6px;
-    padding: 3px 10px;
-    font-size: 9px;
+    color: {AMBER_TEXT};
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 10px;
     font-weight: 600;
+}}
+
+/* ── Status Pills (bright) ── */
+QLabel#PillGreen {{
+    background-color: {GREEN_PILL};
+    color: white;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 10px;
+    font-weight: 700;
+}}
+
+QLabel#PillPurple {{
+    background-color: {PURPLE};
+    color: white;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 10px;
+    font-weight: 700;
+}}
+
+QLabel#PillYellow {{
+    background-color: {AMBER_PILL};
+    color: white;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 10px;
+    font-weight: 700;
+}}
+
+QLabel#PillRed {{
+    background-color: {RED_PILL};
+    color: white;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 10px;
+    font-weight: 700;
 }}
 
 /* ── Buttons ── */
 QPushButton#BtnPrimary {{
     background-color: {BRAND};
     color: white;
-    border: 1px solid {BRAND};
-    border-radius: 8px;
-    padding: 0 16px;
-    font-size: 12px;
+    border: none;
+    border-radius: 10px;
+    padding: 0 20px;
+    font-size: 13px;
     font-weight: 600;
-    font-family: "DM Sans", sans-serif;
-    min-height: 34px;
+    font-family: "Inter", "DM Sans", sans-serif;
+    min-height: 40px;
 }}
 
 QPushButton#BtnPrimary:hover {{
@@ -217,7 +311,7 @@ QPushButton#BtnPrimary:hover {{
 }}
 
 QPushButton#BtnPrimary:pressed {{
-    background-color: {BRAND_GRAD_START};
+    background-color: {BRAND_MID};
 }}
 
 QPushButton#BtnPrimary:disabled {{
@@ -228,14 +322,14 @@ QPushButton#BtnPrimary:disabled {{
 QPushButton#BtnCapture {{
     background-color: {BRAND};
     color: white;
-    border: 1px solid {BRAND};
-    border-radius: 8px;
-    padding: 0 20px;
-    font-size: 12px;
+    border: none;
+    border-radius: 12px;
+    padding: 0 32px;
+    font-size: 14px;
     font-weight: 700;
-    font-family: "DM Sans", sans-serif;
-    min-height: 40px;
-    letter-spacing: 0px;
+    font-family: "Inter", "DM Sans", sans-serif;
+    min-height: 50px;
+    letter-spacing: 0.3px;
 }}
 
 QPushButton#BtnCapture:hover {{
@@ -249,24 +343,24 @@ QPushButton#BtnCapture:disabled {{
 
 QPushButton#BtnSecondary {{
     background-color: white;
-    color: {TEXT_PRIMARY};
-    border: 1.5px solid {BORDER};
-    border-radius: 8px;
-    padding: 0 14px;
-    font-size: 12px;
+    color: {BRAND};
+    border: 1px solid {BORDER};
+    border-radius: 10px;
+    padding: 0 20px;
+    font-size: 13px;
     font-weight: 600;
-    font-family: "DM Sans", sans-serif;
-    min-height: 34px;
+    font-family: "Inter", "DM Sans", sans-serif;
+    min-height: 40px;
 }}
 
 QPushButton#BtnSecondary:hover {{
     background-color: {BRAND_LIGHT};
-    border-color: {BORDER_MEDIUM};
-    color: {TEXT_PRIMARY};
+    border-color: {BRAND};
+    color: {BRAND};
 }}
 
 QPushButton#BtnSecondary:pressed {{
-    background-color: #BFDBFE;
+    background-color: #C7D2FE;
 }}
 
 QPushButton#BtnSecondary:disabled {{
@@ -279,11 +373,11 @@ QPushButton#BtnDanger {{
     background-color: transparent;
     color: {RED};
     border: 1.5px solid {RED};
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 0 20px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
-    min-height: 36px;
+    min-height: 40px;
 }}
 
 QPushButton#BtnDanger:hover {{
@@ -291,57 +385,29 @@ QPushButton#BtnDanger:hover {{
 }}
 
 QPushButton#BtnSmall {{
-    background-color: white;
-    color: {TEXT_SECONDARY};
+    background-color: transparent;
+    color: {BRAND};
     border: 1px solid {BORDER};
-    border-radius: 7px;
-    padding: 0 10px;
-    font-size: 11px;
-    min-height: 26px;
+    border-radius: 8px;
+    padding: 0 12px;
+    font-size: 12px;
+    min-height: 32px;
 }}
 
 QPushButton#BtnSmall:hover {{
-    background-color: {BG_TABLE_ALT};
-    border-color: {BORDER_MEDIUM};
-}}
-
-QPushButton#BtnMiniPrimary {{
-    background-color: {BRAND};
-    color: white;
-    border: 1px solid {BRAND};
-    border-radius: 7px;
-    padding: 0 10px;
-    font-size: 10px;
-    min-height: 26px;
-}}
-
-QPushButton#BtnMiniPrimary:hover {{
-    background-color: {BRAND_DARK};
-}}
-
-QPushButton#BtnMiniDanger {{
-    background-color: white;
-    color: {RED};
-    border: 1px solid #F2B6B6;
-    border-radius: 7px;
-    padding: 0 10px;
-    font-size: 10px;
-    min-height: 26px;
-}}
-
-QPushButton#BtnMiniDanger:hover {{
-    background-color: {RED_LIGHT};
+    background-color: {BRAND_LIGHT};
+    border-color: {BRAND};
 }}
 
 /* ── Inputs ── */
 QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox, QDateEdit {{
     background-color: {BG_INPUT};
-    border: 1px solid {BORDER};
-    border-radius: 8px;
-    padding: 0 10px;
-    min-height: 34px;
+    border: 1.5px solid {BORDER};
+    border-radius: 10px;
+    padding: 0 14px;
+    min-height: 40px;
     color: {TEXT_PRIMARY};
-    font-size: 12px;
+    font-size: 13px;
     selection-background-color: {BRAND_LIGHT};
 }}
 
@@ -365,12 +431,12 @@ QLineEdit:disabled, QComboBox:disabled {{
 
 QLineEdit#PlateInput {{
     font-family: "JetBrains Mono", "Courier New", monospace;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
-    background-color: white;
-    border-color: {BORDER_MEDIUM};
-    letter-spacing: 0px;
-    color: {TEXT_PRIMARY};
+    background-color: {BRAND_LIGHT};
+    border-color: {BRAND};
+    letter-spacing: 1px;
+    color: {BRAND_DARK};
 }}
 
 QComboBox::drop-down {{
@@ -382,7 +448,7 @@ QComboBox::drop-down {{
 QComboBox QAbstractItemView {{
     background: white;
     border: 1px solid {BORDER};
-    border-radius: 8px;
+    border-radius: 10px;
     selection-background-color: {BRAND_LIGHT};
     color: {TEXT_BODY};
     padding: 4px;
@@ -390,19 +456,19 @@ QComboBox QAbstractItemView {{
 
 /* ── Tables ── */
 QTableWidget#TableWidget {{
-    background: {BG_CARD};
-    border: 1px solid {BORDER};
-    border-radius: 8px;
-    gridline-color: {BORDER};
+    background: white;
+    border: none;
+    border-radius: 16px;
+    gridline-color: transparent;
     selection-background-color: {BRAND_LIGHT};
     alternate-background-color: {BG_TABLE_ALT};
 }}
 
 QTableWidget#TableWidget::item {{
-    padding: 6px 10px;
+    padding: 10px 14px;
     color: {TEXT_BODY};
     border: none;
-    min-height: 36px;
+    min-height: 48px;
 }}
 
 QTableWidget#TableWidget::item:selected {{
@@ -411,80 +477,49 @@ QTableWidget#TableWidget::item:selected {{
 }}
 
 QHeaderView::section {{
-    background-color: #EDF1F5;
+    background-color: {BG_CARD};
     color: {TEXT_SECONDARY};
     font-weight: 600;
-    font-size: 10px;
-    padding: 6px 10px;
+    font-size: 11px;
+    padding: 10px 14px;
     border: none;
     border-bottom: 1px solid {BORDER};
-    text-transform: none;
-    letter-spacing: 0px;
-}}
-
-/* ── KPI Cards ── */
-QLabel#KpiValue {{
-    font-family: "Inter", "DM Sans", sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    color: {TEXT_PRIMARY};
-    background: transparent;
-}}
-
-QLabel#KpiLabel {{
-    font-size: 10px;
-    color: {TEXT_MUTED};
-    background: transparent;
-}}
-
-QLabel#KpiIcon {{
-    font-size: 9px;
-    color: {TEXT_SECONDARY};
-    background: #E9EDF2;
-    border: 1px solid {BORDER};
-    border-radius: 6px;
-    padding: 2px 6px;
-    font-weight: 700;
-    letter-spacing: 0px;
-}}
-
-QWidget#SidebarDivider {{
-    background: {BORDER};
-    min-height: 1px;
-    max-height: 1px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }}
 
 /* ── Status bar ── */
 QWidget#StatusBar {{
     background-color: {BG_SIDEBAR};
     border-top: 1px solid {BORDER};
-    min-height: 32px;
-    max-height: 32px;
+    min-height: 36px;
+    max-height: 36px;
 }}
 
 QLabel#StatusBarLabel {{
-    font-size: 9px;
+    font-size: 11px;
     color: {TEXT_SECONDARY};
     background: transparent;
-    font-family: "DM Sans", sans-serif;
+    font-family: "Inter", "DM Sans", sans-serif;
+    font-weight: 500;
 }}
 
 QLabel#StatusBarClock {{
     font-family: "JetBrains Mono", "Courier New", monospace;
-    font-size: 9px;
+    font-size: 11px;
     color: {TEXT_SECONDARY};
     background: transparent;
 }}
 
 QLabel#ScaleOnline {{
-    font-size: 9px;
+    font-size: 11px;
     color: {GREEN};
     background: transparent;
     font-weight: 600;
 }}
 
 QLabel#ScaleOffline {{
-    font-size: 9px;
+    font-size: 11px;
     color: {RED};
     background: transparent;
     font-weight: 600;
@@ -493,15 +528,15 @@ QLabel#ScaleOffline {{
 /* ── Page titles ── */
 QLabel#PageTitle {{
     font-family: "Inter", "DM Sans", sans-serif;
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 700;
     color: {TEXT_PRIMARY};
     background: transparent;
 }}
 
 QLabel#SectionTitle {{
     font-family: "Inter", "DM Sans", sans-serif;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
     color: {TEXT_PRIMARY};
     background: transparent;
@@ -511,37 +546,36 @@ QLabel#TicketNumber {{
     font-family: "JetBrains Mono", "Courier New", monospace;
     font-size: 11px;
     font-weight: 700;
-    color: {TEXT_SECONDARY};
+    color: {BRAND};
     background: transparent;
-    letter-spacing: 0px;
+    letter-spacing: 0.5px;
 }}
 
 /* ── Step pills ── */
 QLabel#StepActive {{
-    background-color: {TEXT_PRIMARY};
+    background-color: {BRAND};
     color: white;
-    border-radius: 8px;
-    padding: 2px 10px;
-    font-size: 10px;
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 11px;
     font-weight: 700;
 }}
 
 QLabel#StepDone {{
-    background-color: #EAF8F1;
+    background-color: {GREEN_LIGHT};
     color: {GREEN};
-    border: 1px solid #BDE7CD;
-    border-radius: 8px;
-    padding: 2px 10px;
-    font-size: 10px;
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 11px;
     font-weight: 600;
 }}
 
 QLabel#StepPending {{
-    background-color: #EDF1F5;
+    background-color: {BG_PAGE};
     color: {TEXT_MUTED};
-    border-radius: 8px;
-    padding: 2px 10px;
-    font-size: 10px;
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 11px;
     border: 1px solid {BORDER};
 }}
 
@@ -549,8 +583,8 @@ QLabel#StepPending {{
 QFrame#TicketSummaryBox {{
     background-color: {GREEN_LIGHT};
     border: 1px solid {GREEN};
-    border-radius: 8px;
-    padding: 12px;
+    border-radius: 12px;
+    padding: 16px;
 }}
 
 QFrame#TicketSummaryBox QLabel {{
@@ -560,7 +594,7 @@ QFrame#TicketSummaryBox QLabel {{
 
 QLabel#NetHero {{
     font-family: "JetBrains Mono", "Courier New", monospace;
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 700;
     color: {BRAND};
     background: transparent;
@@ -568,18 +602,19 @@ QLabel#NetHero {{
 
 /* ── Tab widget ── */
 QTabWidget::pane {{
-    border: 1px solid {BORDER};
-    border-radius: 8px;
+    border: none;
+    border-radius: 16px;
     background: white;
 }}
 
 QTabBar::tab {{
     background: transparent;
     color: {TEXT_SECONDARY};
-    padding: 8px 20px;
+    padding: 10px 24px;
     border: none;
     border-bottom: 2px solid transparent;
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 500;
 }}
 
 QTabBar::tab:selected {{
@@ -594,15 +629,15 @@ QTabBar::tab:hover {{
 
 /* ── Scrollbars ── */
 QScrollBar:vertical {{
-    background: {BG_PAGE};
-    width: 8px;
+    background: transparent;
+    width: 6px;
     margin: 0;
-    border-radius: 4px;
+    border-radius: 3px;
 }}
 
 QScrollBar::handle:vertical {{
     background: {BORDER_MEDIUM};
-    border-radius: 4px;
+    border-radius: 3px;
     min-height: 24px;
 }}
 
@@ -615,14 +650,14 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
 }}
 
 QScrollBar:horizontal {{
-    background: {BG_PAGE};
-    height: 8px;
-    border-radius: 4px;
+    background: transparent;
+    height: 6px;
+    border-radius: 3px;
 }}
 
 QScrollBar::handle:horizontal {{
     background: {BORDER_MEDIUM};
-    border-radius: 4px;
+    border-radius: 3px;
     min-width: 24px;
 }}
 
@@ -633,13 +668,13 @@ QMessageBox {{
 
 QMessageBox QLabel {{
     color: {TEXT_BODY};
-    font-size: 12px;
+    font-size: 13px;
 }}
 
 /* ── Progress bar ── */
 QProgressBar {{
     background: {BG_PAGE};
-    border: 1px solid {BORDER};
+    border: none;
     border-radius: 4px;
     height: 6px;
     text-align: center;
@@ -650,44 +685,18 @@ QProgressBar::chunk {{
     border-radius: 4px;
 }}
 
-/* ── Stability progress bar ── */
-QProgressBar#StabilityBar {{
-    background: {BG_PAGE};
-    border: none;
-    border-radius: 2px;
-    height: 4px;
-    text-align: center;
-}}
-
-QProgressBar#StabilityBar::chunk {{
-    background: {GREEN};
-    border-radius: 2px;
-}}
-
-/* ── Overload warning banner ── */
-QLabel#OverloadBanner {{
-    background-color: {RED_LIGHT};
-    color: {RED_DARK};
-    border: 1px solid #FCA5A5;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 13px;
-    font-weight: 700;
-    text-align: center;
-}}
-
 /* ── Checkbox ── */
 QCheckBox {{
     color: {TEXT_BODY};
-    font-size: 12px;
+    font-size: 13px;
     spacing: 8px;
 }}
 
 QCheckBox::indicator {{
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border: 1.5px solid {BORDER_MEDIUM};
-    border-radius: 4px;
+    border-radius: 5px;
     background: white;
 }}
 
@@ -699,17 +708,17 @@ QCheckBox::indicator:checked {{
 /* ── Login card ── */
 QFrame#LoginCard {{
     background-color: white;
-    border: 1px solid {BORDER};
-    border-radius: 16px;
-    padding: 32px;
+    border: none;
+    border-radius: 20px;
+    padding: 40px;
 }}
 
 /* ── Setup card ── */
 QFrame#SetupCard {{
     background-color: white;
-    border: 1px solid {BORDER};
-    border-radius: 12px;
-    padding: 24px;
+    border: none;
+    border-radius: 16px;
+    padding: 28px;
 }}
 
 /* ── Error message ── */
@@ -717,9 +726,9 @@ QLabel#ErrorLabel {{
     background-color: {RED_LIGHT};
     color: {RED_DARK};
     border: 1px solid #FCA5A5;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 12px;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
     font-weight: 500;
 }}
 
@@ -728,9 +737,9 @@ QLabel#SuccessLabel {{
     background-color: {GREEN_LIGHT};
     color: {GREEN_TEXT};
     border: 1px solid #86EFAC;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 12px;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
     font-weight: 500;
 }}
 
@@ -739,9 +748,9 @@ QLabel#InfoLabel {{
     background-color: {BRAND_LIGHT};
     color: {BRAND_DARK};
     border: 1px solid #93C5FD;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 12px;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
     font-weight: 500;
 }}
 
@@ -762,8 +771,8 @@ QTableWidget#TableWidget QTableWidgetItem[void="true"] {{
 QFrame#ManualWeightBox {{
     background-color: {AMBER_LIGHT};
     border: 1px solid {AMBER};
-    border-radius: 8px;
-    padding: 8px;
+    border-radius: 10px;
+    padding: 10px;
 }}
 
 /* ── Sidebar section label ── */
@@ -771,27 +780,28 @@ QLabel#SidebarSection {{
     font-size: 9px;
     font-weight: 700;
     color: {TEXT_MUTED};
-    letter-spacing: 0px;
+    letter-spacing: 1px;
     background: transparent;
-    padding: 8px 16px 4px 16px;
+    padding: 10px 16px 4px 16px;
     text-transform: uppercase;
 }}
 
 /* ── Company badge in sidebar ── */
 QLabel#CompanyBadge {{
-    font-size: 10px;
+    font-size: 11px;
     color: {TEXT_SECONDARY};
     background: transparent;
     padding: 0 16px;
+    font-weight: 500;
 }}
 
 /* ── Wizard header ── */
 QFrame#WizardHeader {{
     background-color: {BRAND};
     border-radius: 0px;
-    padding: 16px 24px;
-    min-height: 72px;
-    max-height: 72px;
+    padding: 20px 28px;
+    min-height: 80px;
+    max-height: 80px;
 }}
 
 QFrame#WizardHeader QLabel {{
@@ -799,74 +809,61 @@ QFrame#WizardHeader QLabel {{
     background: transparent;
 }}
 
-/* ── Wizard pages ── */
-QWidget#WizardPage {{
-    background-color: {BG_PAGE};
-}}
-
-/* ── Setup wizard form rows ── */
-QFormLayout::item {{
-    spacing: 8px;
-}}
-
-QLabel#FormLabel {{
-    color: {TEXT_SECONDARY};
-    font-size: 12px;
-    font-weight: 500;
-    background: transparent;
-}}
-
-QLabel#FormLabelRequired {{
-    color: {TEXT_PRIMARY};
-    font-size: 12px;
-    font-weight: 600;
-    background: transparent;
-}}
-
-/* ── Password strength ── */
-QLabel#PwStrength {{
-    font-size: 11px;
+/* ── Overload warning banner ── */
+QLabel#OverloadBanner {{
+    background-color: {RED_LIGHT};
+    color: {RED_DARK};
+    border: 1px solid #FCA5A5;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 14px;
     font-weight: 700;
-    letter-spacing: 0.5px;
+    text-align: center;
+}}
+
+/* ── Top nav bar ── */
+QFrame#TopNav {{
+    background-color: {BG_SIDEBAR};
+    border-bottom: 1px solid {BORDER};
+    min-height: 56px;
+    max-height: 56px;
+}}
+
+QPushButton#TopNavBtn {{
     background: transparent;
-    padding: 4px 0px;
+    border: none;
+    border-radius: 8px;
+    color: {TEXT_SECONDARY};
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    margin: 0 2px;
 }}
 
-/* ── Step indicator dots ── */
-QFrame#StepDotActive {{
-    background-color: {BRAND};
-    border-radius: 6px;
-    min-width: 12px;
-    max-width: 12px;
-    min-height: 12px;
-    max-height: 12px;
+QPushButton#TopNavBtn:hover {{
+    background-color: {BG_HOVER};
+    color: {TEXT_PRIMARY};
 }}
 
-QFrame#StepDotDone {{
-    background-color: {GREEN};
-    border-radius: 6px;
-    min-width: 12px;
-    max-width: 12px;
-    min-height: 12px;
-    max-height: 12px;
+QPushButton#TopNavBtn:checked {{
+    background-color: {BRAND_LIGHT};
+    color: {BRAND};
+    font-weight: 600;
 }}
 
-QFrame#StepDotPending {{
-    background-color: {BORDER_MEDIUM};
-    border-radius: 6px;
-    min-width: 12px;
-    max-width: 12px;
-    min-height: 12px;
-    max-height: 12px;
+/* ── Search input ── */
+QLineEdit#SearchInput {{
+    background-color: {BG_INPUT};
+    border: 1.5px solid {BORDER};
+    border-radius: 20px;
+    padding: 0 16px;
+    min-height: 36px;
+    color: {TEXT_PRIMARY};
+    font-size: 13px;
 }}
 
-QFrame#StepLine {{
-    background-color: {BORDER};
-    max-height: 2px;
-}}
-
-QFrame#StepLineDone {{
-    background-color: {GREEN};
-    max-height: 2px;
+QLineEdit#SearchInput:focus {{
+    border-color: {BRAND};
+    background-color: white;
 }}
 """

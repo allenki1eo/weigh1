@@ -1,4 +1,4 @@
-"""WeightDisplayWidget — reusable live weight hero panel."""
+"""WeightDisplayWidget — modern live weight hero panel."""
 from __future__ import annotations
 
 from PyQt6.QtCore import Qt, pyqtSignal
@@ -25,42 +25,56 @@ class WeightDisplayWidget(QFrame):
 
     def _build_ui(self) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 16, 20, 16)
-        layout.setSpacing(8)
+        layout.setContentsMargins(24, 20, 24, 20)
+        layout.setSpacing(10)
 
-        # Chip row
-        chip_row = QHBoxLayout()
-        chip_row.setSpacing(8)
+        # Header row: title + status chip
+        header = QHBoxLayout()
+        header.setSpacing(8)
+
+        title = QLabel(t("live_weight"))
+        title.setObjectName("SectionTitle")
+        header.addWidget(title)
+        header.addStretch()
+
         self._chip = QLabel(t("status_unstable"))
         self._chip.setObjectName("ChipUnstable")
-        chip_row.addWidget(self._chip)
-        chip_row.addStretch()
-        layout.addLayout(chip_row)
+        header.addWidget(self._chip)
+        layout.addLayout(header)
 
         # Main weight hero
         hero_row = QHBoxLayout()
-        hero_row.setSpacing(8)
+        hero_row.setSpacing(10)
         hero_row.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
 
-        font_size = "32" if self._compact else "48"
+        font_size = "36" if self._compact else "56"
         self._weight_label = QLabel("0.00")
         self._weight_label.setObjectName("WeightHero")
         if self._compact:
-            self._weight_label.setStyleSheet("font-size: 32px;")
+            self._weight_label.setStyleSheet("font-size: 36px; letter-spacing: -1px;")
+        else:
+            self._weight_label.setStyleSheet("font-size: 56px; letter-spacing: -2px;")
         hero_row.addWidget(self._weight_label)
 
         self._unit_label = QLabel("kg")
         self._unit_label.setObjectName("WeightUnit")
         self._unit_label.setAlignment(Qt.AlignmentFlag.AlignBottom)
+        self._unit_label.setStyleSheet("padding-bottom: 10px;")
         hero_row.addWidget(self._unit_label)
         hero_row.addStretch()
         layout.addLayout(hero_row)
+
+        # Divider
+        divider = QWidget()
+        divider.setFixedHeight(1)
+        divider.setStyleSheet("background-color: #E5E7EB;")
+        layout.addWidget(divider)
 
         # Sub weights row (tare / gross / net)
         self._sub_frame = QWidget()
         sub_layout = QHBoxLayout(self._sub_frame)
         sub_layout.setContentsMargins(0, 4, 0, 0)
-        sub_layout.setSpacing(24)
+        sub_layout.setSpacing(32)
 
         self._tare_label = self._make_sub(t("tare_weight"), "—")
         self._gross_label = self._make_sub(t("gross_weight"), "—")
@@ -76,7 +90,7 @@ class WeightDisplayWidget(QFrame):
         w = QWidget()
         vl = QVBoxLayout(w)
         vl.setContentsMargins(0, 0, 0, 0)
-        vl.setSpacing(1)
+        vl.setSpacing(2)
         lbl_title = QLabel(title)
         lbl_title.setObjectName("KpiLabel")
         lbl_val = QLabel(value)

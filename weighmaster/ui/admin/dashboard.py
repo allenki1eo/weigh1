@@ -1,4 +1,4 @@
-"""Admin dashboard — KPIs, recent tickets, commodity chart."""
+"""Admin dashboard — modern KPIs, recent tickets, commodity chart."""
 from __future__ import annotations
 
 from datetime import date
@@ -17,7 +17,7 @@ from weighmaster.services import report_service
 from weighmaster.services.weighing_service import get_pending_tickets, get_ticket_history
 from weighmaster.ui.components.stat_card import KpiCard
 from weighmaster.ui.components.ticket_table import TicketTableWidget
-from weighmaster.ui.theme import GREEN, BRAND, AMBER, RED, BORDER, BG_PAGE
+from weighmaster.ui.theme import GREEN, BRAND, AMBER, RED, BORDER, BG_PAGE, PURPLE, TEAL
 
 
 class CommodityBarChart(QWidget):
@@ -26,7 +26,7 @@ class CommodityBarChart(QWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self._data: list[dict] = []
-        self.setMinimumHeight(200)
+        self.setMinimumHeight(220)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
     def set_data(self, data: list[dict]) -> None:
@@ -52,7 +52,7 @@ class CommodityBarChart(QWidget):
         bar_width = max(12, total_bar_width // bar_count - 8)
         spacing = (total_bar_width - bar_width * bar_count) // max(bar_count - 1, 1)
 
-        colors = [BRAND, GREEN, AMBER, "#0694A2", "#7C3AED", "#DB2777", "#EA580C", "#16A34A"]
+        colors = [BRAND, GREEN, AMBER, TEAL, PURPLE, "#DB2777", "#EA580C", "#16A34A"]
 
         for i, item in enumerate(self._data):
             x = margin + i * (bar_width + spacing)
@@ -87,15 +87,26 @@ class AdminDashboard(QWidget):
     def _build_ui(self) -> None:
         main = QVBoxLayout(self)
         main.setContentsMargins(24, 20, 24, 20)
-        main.setSpacing(16)
+        main.setSpacing(20)
 
+        # Header
+        header = QHBoxLayout()
+        header.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         title = QLabel(t("dashboard"))
         title.setObjectName("PageTitle")
-        main.addWidget(title)
+        header.addWidget(title)
+        header.addStretch()
+
+        self._scale_mini = QLabel("●  Scale Offline")
+        self._scale_mini.setStyleSheet(
+            "font-size: 12px; color: #6B7280; background: transparent; font-weight: 500;"
+        )
+        header.addWidget(self._scale_mini)
+        main.addLayout(header)
 
         # KPI row 1
         kpi_row = QHBoxLayout()
-        kpi_row.setSpacing(12)
+        kpi_row.setSpacing(14)
         self._kpi_tickets = KpiCard(t("today_tickets"), "0", "TK")
         self._kpi_weight = KpiCard(t("total_net_weight"), "0 t", "NT")
         self._kpi_void = KpiCard("Voided Today", "0", "VD")
@@ -108,7 +119,7 @@ class AdminDashboard(QWidget):
 
         # KPI row 2 (WTD / MTD)
         kpi_row2 = QHBoxLayout()
-        kpi_row2.setSpacing(12)
+        kpi_row2.setSpacing(14)
         self._kpi_wtd = KpiCard(t("week_to_date"), "0 t", "WT")
         self._kpi_mtd = KpiCard(t("month_to_date"), "0 t", "MT")
         self._kpi_wtd_count = KpiCard(f"{t('week_to_date')} ({t('count')})", "0", "WC")
@@ -117,13 +128,20 @@ class AdminDashboard(QWidget):
             kpi_row2.addWidget(card, 1)
         main.addLayout(kpi_row2)
 
-        # Quick actions
-        actions_row = QHBoxLayout()
-        actions_row.setSpacing(10)
-        actions_lbl = QLabel(t("reports"))
+        # Quick actions bar
+        actions_bar = QFrame()
+        actions_bar.setObjectName("Card")
+        actions_bar.setStyleSheet(
+            actions_bar.styleSheet() + "padding: 12px 18px;"
+        )
+        ab_layout = QHBoxLayout(actions_bar)
+        ab_layout.setContentsMargins(16, 8, 16, 8)
+        ab_layout.setSpacing(10)
+
+        actions_lbl = QLabel("Quick Reports")
         actions_lbl.setObjectName("SectionTitle")
-        actions_row.addWidget(actions_lbl)
-        actions_row.addSpacing(8)
+        ab_layout.addWidget(actions_lbl)
+        ab_layout.addSpacing(8)
 
         for key, label in [
             ("daily", t("daily_summary")),
@@ -134,9 +152,9 @@ class AdminDashboard(QWidget):
             btn = QPushButton(label)
             btn.setObjectName("BtnSecondary")
             btn.clicked.connect(lambda checked, k=key: self.reports_requested.emit(k))
-            actions_row.addWidget(btn)
-        actions_row.addStretch()
-        main.addLayout(actions_row)
+            ab_layout.addWidget(btn)
+        ab_layout.addStretch()
+        main.addWidget(actions_bar)
 
         # Content row
         content = QHBoxLayout()
@@ -146,8 +164,8 @@ class AdminDashboard(QWidget):
         left = QFrame()
         left.setObjectName("Card")
         ll = QVBoxLayout(left)
-        ll.setContentsMargins(16, 12, 16, 12)
-        ll.setSpacing(8)
+        ll.setContentsMargins(18, 14, 18, 14)
+        ll.setSpacing(10)
         recent_lbl = QLabel("Today's Transactions")
         recent_lbl.setObjectName("SectionTitle")
         ll.addWidget(recent_lbl)
@@ -159,8 +177,8 @@ class AdminDashboard(QWidget):
         right = QFrame()
         right.setObjectName("Card")
         rl = QVBoxLayout(right)
-        rl.setContentsMargins(16, 12, 16, 12)
-        rl.setSpacing(8)
+        rl.setContentsMargins(18, 14, 18, 14)
+        rl.setSpacing(10)
         chart_lbl = QLabel(t("commodity_report"))
         chart_lbl.setObjectName("SectionTitle")
         rl.addWidget(chart_lbl)
@@ -201,3 +219,19 @@ class AdminDashboard(QWidget):
         if status == "overload":
             chip = t("status_overload")
         self._kpi_scale.set_value(chip)
+
+        if status == "overload":
+            self._scale_mini.setText("●  Overload")
+            self._scale_mini.setStyleSheet(
+                "font-size: 12px; color: #EF4444; background: transparent; font-weight: 600;"
+            )
+        elif is_stable:
+            self._scale_mini.setText("●  Scale Stable")
+            self._scale_mini.setStyleSheet(
+                "font-size: 12px; color: #10B981; background: transparent; font-weight: 600;"
+            )
+        else:
+            self._scale_mini.setText("●  Scale Unstable")
+            self._scale_mini.setStyleSheet(
+                "font-size: 12px; color: #F59E0B; background: transparent; font-weight: 600;"
+            )

@@ -1,4 +1,4 @@
-"""Bottom status bar — always visible, shows scale, user, and clock."""
+"""Bottom status bar — scale connection, user role, clock."""
 from __future__ import annotations
 
 from datetime import datetime
@@ -14,7 +14,7 @@ class ScaleStatusBar(QWidget):
     def __init__(self, user: User, parent=None) -> None:
         super().__init__(parent)
         self.setObjectName("StatusBar")
-        self.setFixedHeight(32)
+        self.setFixedHeight(28)
         self._user = user
         self._build_ui()
 
@@ -25,10 +25,10 @@ class ScaleStatusBar(QWidget):
 
     def _build_ui(self) -> None:
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(16, 0, 16, 0)
+        layout.setContentsMargins(20, 0, 20, 0)
         layout.setSpacing(0)
 
-        self._scale_label = QLabel("✗ " + t("scale_offline"))
+        self._scale_label = QLabel("○  " + t("scale_offline"))
         self._scale_label.setObjectName("ScaleOffline")
         layout.addWidget(self._scale_label)
 
@@ -49,25 +49,24 @@ class ScaleStatusBar(QWidget):
 
     def _tick(self) -> None:
         now = datetime.now()
-        self._clock_label.setText(now.strftime("%a %d %b %Y  %H:%M:%S"))
+        self._clock_label.setText(now.strftime("%H:%M:%S"))
 
     def set_connected(self, port: str, baud: int = 9600) -> None:
         self._scale_label.setObjectName("ScaleOnline")
-        self._scale_label.setText(f"● {t('scale_online')} · {port} · {baud} baud")
+        self._scale_label.setText(f"● {t('scale_online')} · {port}")
         self._scale_label.style().unpolish(self._scale_label)
         self._scale_label.style().polish(self._scale_label)
 
     def set_disconnected(self) -> None:
         self._scale_label.setObjectName("ScaleOffline")
-        self._scale_label.setText(f"✗ {t('scale_offline')}")
+        self._scale_label.setText(f"○  {t('scale_offline')}")
         self._scale_label.style().unpolish(self._scale_label)
         self._scale_label.style().polish(self._scale_label)
 
     def set_message(self, text: str) -> None:
-        """Temporary status message (clears scale text). Pass empty string to restore."""
         if text:
             self._scale_label.setText(text)
-            self._scale_label.setStyleSheet("color: #B45309; font-weight: 600;")
+            self._scale_label.setStyleSheet("color: #D97706; font-weight: 600; font-size: 11px;")
         else:
             self._scale_label.setStyleSheet("")
             self._scale_label.style().unpolish(self._scale_label)

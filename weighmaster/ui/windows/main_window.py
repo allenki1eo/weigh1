@@ -1,13 +1,14 @@
-"""Root QMainWindow with sidebar + stacked content area + session timeout."""
+"""Root QMainWindow with top nav + sidebar + stacked content + session timeout."""
 from __future__ import annotations
 
 import logging
 import time
+from datetime import datetime
 
 from PyQt6.QtCore import Qt, pyqtSlot, QTimer, QEvent
 from PyQt6.QtWidgets import (
     QHBoxLayout, QLabel, QMainWindow, QPushButton, QStackedWidget,
-    QVBoxLayout, QWidget,
+    QVBoxLayout, QWidget, QFrame,
 )
 
 from weighmaster.config import WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT, SESSION_TIMEOUT_MIN
@@ -17,6 +18,122 @@ from weighmaster.ui.components.sidebar import CollapsibleSidebar
 from weighmaster.ui.components.scale_status_bar import ScaleStatusBar
 
 log = logging.getLogger(__name__)
+
+
+class TopNavBar(QWidget):
+    """Slim application header: logo, app name, scale status, user, clock."""
+
+    def __init__(self, user: User, parent=None) -> None:
+        super().__init__(parent)
+        self.setObjectName("TopNavBar")
+        self.setFixedHeight(52)
+        self._user = user
+        self._build_ui()
+
+        self._clock_timer = QTimer(self)
+        self._clock_timer.timeout.connect(self._tick)
+        self._clock_timer.start(1000)
+        self._tick()
+
+    def _build_ui(self) -> None:
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(20, 0, 20, 0)
+        layout.setSpacing(0)
+
+        # Logo + name (pinned to sidebar width)
+        logo_area = QWidget()
+        logo_area.setFixedWidth(188)
+        la = QHBoxLayout(logo_area)
+        la.setContentsMargins(0, 0, 0, 0)
+        la.setSpacing(8)
+
+        logo = QLabel("◈")
+        logo.setObjectName("TopNavLogo")
+        la.addWidget(logo)
+
+        name = QLabel("WeighMaster")
+        name.setObjectName("TopNavAppName")
+        la.addWidget(name)
+        la.addStretch()
+        layout.addWidget(logo_area)
+
+        # Vertical divider
+        div1 = self._vdiv()
+        layout.addWidget(div1)
+        layout.addSpacing(16)
+
+        # Company / context breadcrumb
+        self._context_label = QLabel()
+        self._context_label.setObjectName("TopNavUser")
+        self._context_label.setStyleSheet(
+            "font-size: 12px; color: #94A3B8; background: transparent;"
+        )
+        layout.addWidget(self._context_label)
+        layout.addStretch()
+
+        # Scale status pill
+        self._scale_label = QLabel("○  Scale Offline")
+        self._scale_label.setObjectName("TopNavScaleOffline")
+        layout.addWidget(self._scale_label)
+
+        layout.addSpacing(16)
+        layout.addWidget(self._vdiv())
+        layout.addSpacing(16)
+
+        # User pill
+        user_pill = QWidget()
+        user_pill.setObjectName("TopNavUserPill")
+        up_layout = QHBoxLayout(user_pill)
+        up_layout.setContentsMargins(10, 4, 10, 4)
+        up_layout.setSpacing(6)
+
+        avatar = QLabel("◉")
+        avatar.setStyleSheet(
+            f"font-size: 14px; color: #4F46E5; background: transparent;"
+        )
+        up_layout.addWidget(avatar)
+
+        role_str = "Admin" if self._user.role == "admin" else "Operator"
+        user_lbl = QLabel(f"{self._user.full_name}  ·  {role_str}")
+        user_lbl.setObjectName("TopNavUser")
+        up_layout.addWidget(user_lbl)
+
+        layout.addWidget(user_pill)
+
+        layout.addSpacing(16)
+        layout.addWidget(self._vdiv())
+        layout.addSpacing(16)
+
+        # Clock
+        self._clock_label = QLabel()
+        self._clock_label.setObjectName("TopNavClock")
+        self._clock_label.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+        layout.addWidget(self._clock_label)
+
+    def _vdiv(self) -> QWidget:
+        div = QWidget()
+        div.setFixedSize(1, 22)
+        div.setStyleSheet("background: #E2E8F0;")
+        return div
+
+    def _tick(self) -> None:
+        now = datetime.now()
+        self._clock_label.setText(now.strftime("%a %d %b  %H:%M"))
+
+    def set_connected(self, port: str) -> None:
+        self._scale_label.setObjectName("TopNavScaleOnline")
+        self._scale_label.setText(f"● Scale Online · {port}")
+        self._scale_label.style().unpolish(self._scale_label)
+        self._scale_label.style().polish(self._scale_label)
+
+    def set_disconnected(self) -> None:
+        self._scale_label.setObjectName("TopNavScaleOffline")
+        self._scale_label.setText("○  Scale Offline")
+        self._scale_label.style().unpolish(self._scale_label)
+        self._scale_label.style().polish(self._scale_label)
+
+    def set_context(self, text: str) -> None:
+        self._context_label.setText(text)
 
 
 class MainWindow(QMainWindow):
@@ -43,7 +160,11 @@ class MainWindow(QMainWindow):
         root_layout.setContentsMargins(0, 0, 0, 0)
         root_layout.setSpacing(0)
 
-        # Main content (sidebar + stack)
+        # Top navigation bar
+        self._top_nav = TopNavBar(user=self._user)
+        root_layout.addWidget(self._top_nav)
+
+        # Main content row (sidebar + stack)
         content_row = QHBoxLayout()
         content_row.setContentsMargins(0, 0, 0, 0)
         content_row.setSpacing(0)
@@ -135,13 +256,28 @@ class MainWindow(QMainWindow):
         self._stack.setCurrentWidget(screen)
         self._sidebar.set_active(key)
         self._refresh_screen(key)
+        self._update_nav_context(key)
+
+    def _update_nav_context(self, key: str) -> None:
+        labels = {
+            "dashboard": "Dashboard",
+            "new_ticket": "New Ticket",
+            "pending": "Pending — Step 2",
+            "history": "Ticket History",
+            "vehicle_lookup": "Vehicle Lookup",
+            "gate": "Gate Queue",
+            "users": "User Management",
+            "reports": "Reports",
+            "settings": "Settings",
+            "audit": "Audit Log",
+        }
+        self._top_nav.set_context(labels.get(key, ""))
 
     def _refresh_screen(self, key: str) -> None:
         screen = self._screens.get(key)
         if screen and hasattr(screen, "refresh"):
             screen.refresh()
 
-        # Update pending badge
         try:
             from weighmaster.services.weighing_service import get_pending_tickets
             count = len(get_pending_tickets())
@@ -197,33 +333,30 @@ class MainWindow(QMainWindow):
     @pyqtSlot(str)
     def on_scale_connected(self, port: str) -> None:
         self._status_bar.set_connected(port)
+        self._top_nav.set_connected(port)
 
     @pyqtSlot(str)
     def on_scale_disconnected(self, msg: str) -> None:
         self._status_bar.set_disconnected()
+        self._top_nav.set_disconnected()
 
     def _setup_session_timeout(self) -> None:
-        """Start timers for inactivity detection and warning."""
         timeout_sec = SESSION_TIMEOUT_MIN * 60
-        warn_sec = max(30, timeout_sec - 60)  # warn 1 min before lock, min 30s
+        warn_sec = max(30, timeout_sec - 60)
 
-        # Activity tracking via event filter
         self.installEventFilter(self)
         for widget in self.findChildren(QWidget):
             widget.installEventFilter(self)
 
-        # Warning timer (1 min before lock)
         self._warn_timer = QTimer(self)
         self._warn_timer.timeout.connect(self._check_inactivity_warning)
-        self._warn_timer.start(max(5000, (warn_sec // 5) * 1000))  # check every 1/5th of warn period
+        self._warn_timer.start(max(5000, (warn_sec // 5) * 1000))
 
-        # Lock timer
         self._lock_timer = QTimer(self)
         self._lock_timer.timeout.connect(self._check_lock)
-        self._lock_timer.start(10000)  # check every 10 seconds
+        self._lock_timer.start(10000)
 
     def eventFilter(self, watched, event: QEvent) -> bool:
-        """Reset inactivity timer on user input."""
         if event.type() in (
             QEvent.Type.MouseButtonPress,
             QEvent.Type.MouseButtonRelease,
@@ -260,37 +393,43 @@ class MainWindow(QMainWindow):
             self._show_lock_overlay()
 
     def _show_lock_overlay(self) -> None:
-        """Show a full-screen overlay requiring re-authentication."""
         if self._lock_overlay is not None:
             return
 
         overlay = QWidget(self.centralWidget())
         overlay.setGeometry(self.centralWidget().rect())
-        overlay.setStyleSheet("background-color: rgba(15, 23, 42, 0.85);")
+        overlay.setStyleSheet("background-color: rgba(15, 23, 42, 0.88);")
         overlay.setAutoFillBackground(True)
 
         layout = QVBoxLayout(overlay)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.setSpacing(12)
 
-        icon = QLabel("🔒")
-        icon.setStyleSheet("font-size: 48px; color: white; background: transparent;")
+        icon = QLabel("◉")
+        icon.setStyleSheet("font-size: 40px; color: #4F46E5; background: transparent;")
         icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(icon)
 
-        msg = QLabel("Session Locked Due to Inactivity")
-        msg.setStyleSheet("font-size: 18px; font-weight: 600; color: white; background: transparent;")
+        msg = QLabel("Session Locked")
+        msg.setStyleSheet(
+            "font-size: 20px; font-weight: 700; color: white; background: transparent;"
+        )
         msg.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(msg)
 
         sub = QLabel(f"Logged in as: {self._user.full_name}")
-        sub.setStyleSheet("font-size: 12px; color: rgba(255,255,255,0.7); background: transparent;")
+        sub.setStyleSheet(
+            "font-size: 12px; color: rgba(255,255,255,0.55); background: transparent;"
+        )
         sub.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(sub)
 
-        btn = QPushButton("Click to Unlock")
+        layout.addSpacing(8)
+
+        btn = QPushButton("Unlock Session")
         btn.setStyleSheet(
-            "background-color: #2563EB; color: white; border: none; "
-            "border-radius: 8px; padding: 12px 32px; font-size: 14px; font-weight: 600;"
+            "background-color: #4F46E5; color: white; border: none; "
+            "border-radius: 8px; padding: 10px 28px; font-size: 13px; font-weight: 600;"
         )
         btn.clicked.connect(self._unlock_session)
         layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -300,7 +439,6 @@ class MainWindow(QMainWindow):
         self._lock_overlay = overlay
 
     def _unlock_session(self) -> None:
-        """Show login dialog to re-authenticate before removing overlay."""
         if self._lock_overlay is None:
             return
 
